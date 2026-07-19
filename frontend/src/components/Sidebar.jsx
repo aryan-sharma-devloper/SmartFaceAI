@@ -2,78 +2,94 @@ import {
   FaHome,
   FaUsers,
   FaCamera,
-  FaCheckCircle,
   FaClipboardList,
-  FaCog,
+  FaUserPlus,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
-import { useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Sidebar() {
-
   const navigate = useNavigate();
-  const location = useLocation();
+
+  function logout() {
+    localStorage.removeItem("token");
+    navigate("/");
+  }
 
   const menu = [
     {
-      name: "Dashboard",
+      title: "Dashboard",
       icon: <FaHome />,
       path: "/dashboard",
     },
     {
-      name: "Manage Users",
+      title: "Users",
       icon: <FaUsers />,
       path: "/users",
     },
     {
-      name: "Enroll Face",
-      icon: <FaCamera />,
-      path: "/enroll",
+      title: "Add User",
+      icon: <FaUserPlus />,
+      path: "/add-user",
     },
     {
-      name: "Verify Face",
-      icon: <FaCheckCircle />,
+      title: "Verify Face",
+      icon: <FaCamera />,
       path: "/verify",
     },
     {
-      name: "Verification Logs",
+      title: "Logs",
       icon: <FaClipboardList />,
       path: "/logs",
-    },
-    {
-      name: "Settings",
-      icon: <FaCog />,
-      path: "/settings",
     },
   ];
 
   return (
-    <div className="w-72 min-h-screen bg-slate-900 text-white">
+    <aside className="fixed left-0 top-0 h-screen w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl flex flex-col">
 
-      <div className="text-center py-8 border-b border-slate-700">
+      {/* Logo */}
 
-        <h1 className="text-3xl font-bold">
-          Smart Face AI
-        </h1>
+      <div className="p-8 border-b border-slate-700">
 
-        <p className="text-gray-400 mt-2">
-          Admin Panel
-        </p>
+        <div className="flex items-center gap-4">
+
+          <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-2xl font-bold shadow-lg">
+            AI
+          </div>
+
+          <div>
+
+            <h1 className="text-2xl font-bold">
+              Smart Face AI
+            </h1>
+
+            <p className="text-sm text-gray-300">
+              Admin Panel
+            </p>
+
+          </div>
+
+        </div>
 
       </div>
 
-      <div className="mt-8">
+      {/* Navigation */}
+
+      <nav className="flex-1 mt-6 px-4">
 
         {menu.map((item) => (
 
-          <button
-            key={item.name}
-            onClick={() => navigate(item.path)}
-            className={`w-full flex items-center gap-4 px-8 py-4 text-left hover:bg-blue-600 transition ${
-              location.pathname === item.path
-                ? "bg-blue-600"
-                : ""
-            }`}
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center gap-4 px-5 py-4 rounded-xl mb-3 transition-all duration-300 ${
+                isActive
+                  ? "bg-blue-600 shadow-lg"
+                  : "hover:bg-slate-700"
+              }`
+            }
           >
 
             <span className="text-xl">
@@ -81,16 +97,51 @@ function Sidebar() {
             </span>
 
             <span className="text-lg">
-              {item.name}
+              {item.title}
             </span>
 
-          </button>
+          </NavLink>
 
         ))}
 
+      </nav>
+
+      {/* Admin */}
+
+      <div className="border-t border-slate-700 p-6">
+
+        <div className="flex items-center gap-4 mb-5">
+
+          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-xl font-bold">
+            A
+          </div>
+
+          <div>
+
+            <p className="font-semibold">
+              Administrator
+            </p>
+
+            <p className="text-sm text-gray-400">
+              Smart Face AI
+            </p>
+
+          </div>
+
+        </div>
+
+        <button
+          onClick={logout}
+          className="w-full flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 rounded-xl py-3 transition"
+        >
+          <FaSignOutAlt />
+
+          Logout
+        </button>
+
       </div>
 
-    </div>
+    </aside>
   );
 }
 

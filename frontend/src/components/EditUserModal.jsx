@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { updateUser } from "../services/userService";
-
+import toast from "react-hot-toast";
 function EditUserModal({ user, onClose, onUpdated }) {
   const [formData, setFormData] = useState({
     employee_id: "",
@@ -35,7 +35,7 @@ function EditUserModal({ user, onClose, onUpdated }) {
     try {
       await updateUser(user.id, formData);
 
-      alert("User Updated Successfully");
+      toast.success("User Updated Successfully");
 
       onUpdated();
 
@@ -43,7 +43,7 @@ function EditUserModal({ user, onClose, onUpdated }) {
     } catch (error) {
       console.error(error);
 
-      alert("Update Failed");
+     toast.error("Unable to update user.");
     }
   };
 

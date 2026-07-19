@@ -1,33 +1,33 @@
 import { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Webcam from "react-webcam";
+import { ClipLoader } from "react-spinners";
+import toast from "react-hot-toast";
 import api from "../api/axios";
 
 function EnrollFace() {
   const webcamRef = useRef(null);
 
   const navigate = useNavigate();
-
   const { id } = useParams();
 
   const [loading, setLoading] = useState(false);
 
   const captureFace = async () => {
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      const imageSrc = webcamRef.current.getScreenshot();
+    try {
+      const imageSrc = webcamRef.current?.getScreenshot();
 
       if (!imageSrc) {
-        alert("Unable to capture image.");
+        toast.error("Unable to capture image.");
         return;
       }
 
-      // Convert Base64 → Blob
+      // Convert Base64 to Blob
       const blob = await fetch(imageSrc).then((res) => res.blob());
 
       const formData = new FormData();
-
       formData.append("image", blob, "face.jpg");
 
       const token = localStorage.getItem("token");
@@ -43,18 +43,20 @@ function EnrollFace() {
         }
       );
 
-      alert(response.data.message);
+      toast.success(
+        response.data.message || "Face Enrolled Successfully"
+      );
 
-      navigate("/users");
+      setTimeout(() => {
+        navigate("/users");
+      }, 800);
 
     } catch (error) {
       console.error(error);
 
-      if (error.response) {
-        alert(error.response.data.detail);
-      } else {
-        alert("Enrollment Failed");
-      }
+      toast.error(
+        error.response?.data?.detail || "Enrollment Failed"
+      );
 
     } finally {
       setLoading(false);
@@ -62,40 +64,54 @@ function EnrollFace() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
 
-      <h1 className="text-4xl font-bold mt-8 text-blue-700">
+      <h1 className="text-4xl font-bold text-blue-700">
         Face Enrollment
       </h1>
 
-      <p className="text-gray-500 mt-2">
+      <p className="text-gray-500 mt-2 mb-8">
         Position your face inside the camera
       </p>
 
-      <div className="mt-8 shadow-xl rounded-xl overflow-hidden">
+      <div className="bg-white p-4 rounded-2xl shadow-xl">
 
-       <Webcam
-  ref={webcamRef}
-  audio={false}
-  screenshotFormat="image/jpeg"
-  width={700}
-  height={500}
-  mirrored={false}
-/>
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          mirrored={false}
+          screenshotFormat="image/jpeg"
+          width={700}
+          height={500}
+          className="rounded-xl"
+          videoConstraints={{
+            width: 700,
+            height: 500,
+            facingMode: "user",
+          }}
+        />
 
       </div>
 
       <button
         onClick={captureFace}
         disabled={loading}
-        className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg"
+        className="mt-8 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg flex items-center justify-center min-w-[220px]"
       >
-        {loading ? "Uploading..." : "Capture & Enroll"}
+        {loading ? (
+          <ClipLoader
+            size={22}
+            color="#ffffff"
+          />
+        ) : (
+          "📷 Capture & Enroll"
+        )}
       </button>
 
       <button
         onClick={() => navigate("/users")}
-        className="mt-4 bg-gray-700 hover:bg-gray-800 text-white px-8 py-3 rounded-lg"
+        disabled={loading}
+        className="mt-4 bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg"
       >
         Back
       </button>

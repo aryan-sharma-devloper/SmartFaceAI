@@ -4,9 +4,12 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import VerifyFace from "./pages/VerifyFace";
-
+import AddUser from "./pages/AddUser";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import EditUser from "./pages/EditUser";
+import EnrollFace from "./pages/EnrollFace";
+import VerificationLogs from "./pages/VerificationLogs";
+import Settings from "./pages/Settings";
 function App() {
   return (
     <BrowserRouter>
@@ -47,7 +50,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route path="/add-user" element={<AddUser />} />
+        <Route path="/edit-user/:id" element={<EditUser />} />
+        <Route path="/enroll/:id" element={<EnrollFace />} />
+        <Route
+  path="/verification-logs"
+  element={<VerificationLogs />}
+/>
+<Route path="/settings" element={<Settings />} />
       </Routes>
     </BrowserRouter>
   );

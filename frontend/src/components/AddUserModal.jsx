@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../api/axios";
-
+import toast from "react-hot-toast";
 function AddUserModal({ closeModal, refreshUsers }) {
   const [formData, setFormData] = useState({
     employee_id: "",
@@ -23,7 +23,7 @@ function AddUserModal({ closeModal, refreshUsers }) {
     try {
       await api.post("/users", formData);
 
-      alert("User Added Successfully!");
+      toast.success("User Added Successfully");
 
       refreshUsers();
 
@@ -31,7 +31,7 @@ function AddUserModal({ closeModal, refreshUsers }) {
 
     } catch (err) {
       console.error(err);
-      alert("Unable to add user.");
+      toast.error("Unable to add user.");
     }
   }
 
