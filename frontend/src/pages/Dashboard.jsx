@@ -316,7 +316,7 @@ function Dashboard() {
     Dashboard Summary
 ========================== */}
 
-<section className="mt-8 bg-white rounded-3xl shadow-xl p-6">
+{/* <section className="mt-8 bg-white rounded-3xl shadow-xl p-6">
 
   <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
 
@@ -350,12 +350,12 @@ function Dashboard() {
 
   </div>
 
-</section>
+</section> */}
         {/* ==========================
     System Status
 ========================== */}
 
-<section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
+{/* <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
 
   <div className="bg-white rounded-3xl shadow-lg p-6">
     <div className="flex justify-between items-center">
@@ -408,7 +408,7 @@ function Dashboard() {
     </div>
   </div>
 
-</section>
+</section> */}
                 {/* ==========================
             Quick Actions
         ========================== */}
@@ -707,7 +707,7 @@ function Dashboard() {
     AI System Status
 ========================== */}
 
-<section className="grid lg:grid-cols-4 gap-6 mt-10">
+{/* <section className="grid lg:grid-cols-4 gap-6 mt-10">
 
   <div className="bg-white rounded-3xl shadow-lg p-6">
     <p className="text-gray-500">AI Model</p>
@@ -749,12 +749,12 @@ function Dashboard() {
     </p>
   </div>
 
-</section>
+</section> */}
         {/* ==========================
     Performance
 ========================== */}
 
-<section className="grid md:grid-cols-2 gap-8 mt-10">
+{/* <section className="grid md:grid-cols-2 gap-8 mt-10">
 
   <div className="bg-white rounded-3xl shadow-xl p-7">
 
@@ -846,12 +846,12 @@ function Dashboard() {
 
   </div>
 
-</section>
+</section> */}
 {/* ==========================
     Live System Monitor
 ========================== */}
 
-<section className="grid lg:grid-cols-4 gap-6 mt-10">
+{/* <section className="grid lg:grid-cols-4 gap-6 mt-10">
 
   <div className="bg-white rounded-3xl shadow-xl p-6">
     <p className="text-gray-500">CPU Usage</p>
@@ -909,7 +909,7 @@ function Dashboard() {
     </div>
   </div>
 
-</section>
+</section> */}
 
         {/* ==========================
             Charts
@@ -922,7 +922,7 @@ function Dashboard() {
             monthly={stats.monthly}
             pie={stats.pie}
           />
-
+  
         </section> 
                 {/* ==========================
             Bottom Tables
