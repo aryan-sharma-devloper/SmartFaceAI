@@ -21,26 +21,43 @@ router = APIRouter(
     tags=["Face Recognition"],
 )
 
-
 # ---------------------------------------
-# Face Enrollment
+# Face Enrollment (5 Pose Support)
 # ---------------------------------------
 @router.post(
-    "/enroll/{user_id}",
+    "/enroll/{user_id}/{pose}",
     response_model=FaceEnrollResponse,
 )
 async def enroll(
     user_id: int,
+    pose: str,
     image: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin),
 ):
     image_bytes = await image.read()
 
+    pose = pose.lower()
+
+    valid_poses = [
+        "front",
+        "left",
+        "right",
+        "up",
+        "down",
+    ]
+
+    if pose not in valid_poses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid pose. Allowed poses: {valid_poses}",
+        )
+
     try:
         face = enroll_face(
             db=db,
             user_id=user_id,
+            pose=pose,
             image_bytes=image_bytes,
         )
 
@@ -51,14 +68,14 @@ async def enroll(
             )
 
         return {
-            "message": "Face enrolled successfully",
+            "message": f"{pose.capitalize()} face enrolled successfully",
             "face_id": face.id,
             "user_id": face.user_id,
+            "pose": face.pose,
         }
 
     except Exception as e:
         traceback.print_exc()
-        print("ENROLL ERROR:", repr(e))
 
         raise HTTPException(
             status_code=400,
@@ -87,7 +104,6 @@ async def verify(
 
     except Exception as e:
         traceback.print_exc()
-        print("VERIFY ERROR:", repr(e))
 
         raise HTTPException(
             status_code=400,

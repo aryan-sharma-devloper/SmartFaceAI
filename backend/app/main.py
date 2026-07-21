@@ -12,6 +12,8 @@ from app.api.auth import router as auth_router
 from app.api.users import router as users_router
 from app.api.faces import router as face_router
 from app.api.dashboard import router as dashboard_router
+from app.api.verification_logs import router as verification_logs_router
+from app.api.export import router as export_router
 # Create all tables
 Base.metadata.create_all(bind=engine)
 
@@ -36,7 +38,8 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(face_router)
 app.include_router(dashboard_router)
-
+app.include_router(verification_logs_router)
+app.include_router(export_router)
 @app.get("/")
 def root():
     return {

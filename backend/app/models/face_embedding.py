@@ -7,10 +7,10 @@ from sqlalchemy import (
     String,
     Text,
     func,
+    UniqueConstraint,
 )
 
 from pgvector.sqlalchemy import Vector
-
 from app.database.base import Base
 
 
@@ -32,9 +32,16 @@ class FaceEmbedding(Base):
 
     image_path = Column(Text)
 
-    pose = Column(String(20))
+    # front / left / right / up / down
+    pose = Column(
+        String(20),
+        nullable=False,
+    )
 
-    quality_score = Column(Numeric(5, 2))
+    quality_score = Column(
+        Numeric(5, 2),
+        default=99.00,
+    )
 
     model_name = Column(
         String(50),
@@ -44,4 +51,12 @@ class FaceEmbedding(Base):
     created_at = Column(
         DateTime,
         server_default=func.now(),
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "pose",
+            name="unique_user_pose",
+        ),
     )

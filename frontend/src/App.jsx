@@ -58,6 +58,7 @@ function App() {
   element={<VerificationLogs />}
 />
 <Route path="/settings" element={<Settings />} />
+{/* <Route path="/face-registration/:id" element={<FaceRegistration />} /> */}
       </Routes>
     </BrowserRouter>
   );
