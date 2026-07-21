@@ -10,6 +10,7 @@ import EditUser from "./pages/EditUser";
 import EnrollFace from "./pages/EnrollFace";
 import VerificationLogs from "./pages/VerificationLogs";
 import Settings from "./pages/Settings";
+import Attendance from "./pages/Attendance";
 function App() {
   return (
     <BrowserRouter>
@@ -59,6 +60,14 @@ function App() {
 />
 <Route path="/settings" element={<Settings />} />
 {/* <Route path="/face-registration/:id" element={<FaceRegistration />} /> */}
+<Route
+  path="/attendance"
+  element={
+    <ProtectedRoute>
+      <Attendance />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );

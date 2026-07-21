@@ -11,6 +11,7 @@ from app.models.user import User
 from app.utils.face_engine import face_engine
 from app.utils.similarity import cosine_similarity
 from app.utils.liveness import eye_aspect_ratio
+from app.services.attendance_service import mark_attendance
 
 UPLOAD_DIR = "images/users"
 
@@ -182,59 +183,59 @@ def verify_face(
         # ----------------------------------------
         # Liveness
         # ----------------------------------------
-        try:
+        # try:
 
-            landmarks = face.landmark_2d_106
+        #     landmarks = face.landmark_2d_106
 
-            left_eye = landmarks[33:39]
+        #     left_eye = landmarks[33:39]
 
-            right_eye = landmarks[87:93]
+        #     right_eye = landmarks[87:93]
 
-            left_ear = eye_aspect_ratio(
-                left_eye
-            )
+        #     left_ear = eye_aspect_ratio(
+        #         left_eye
+        #     )
 
-            right_ear = eye_aspect_ratio(
-                right_eye
-            )
+        #     right_ear = eye_aspect_ratio(
+        #         right_eye
+        #     )
 
-            ear = (
-                left_ear + right_ear
-            ) / 2
+        #     ear = (
+        #         left_ear + right_ear
+        #     ) / 2
 
-            print(f"EAR : {ear:.3f}")
+        #     print(f"EAR : {ear:.3f}")
 
-            BLINK_THRESHOLD = 0.18
+        #     BLINK_THRESHOLD = 0.18
 
-            if ear < BLINK_THRESHOLD:
+        #     if ear < BLINK_THRESHOLD:
 
-                blink_counter += 1
+        #         blink_counter += 1
 
-            else:
+        #     else:
 
-                if blink_counter >= 2:
-                    blink_detected = True
+        #         if blink_counter >= 2:
+        #             blink_detected = True
 
-                blink_counter = 0
+        #         blink_counter = 0
 
-        except Exception:
+        # except Exception:
 
-            blink_detected = True
+        #     blink_detected = True
 
-        if not blink_detected:
+        # if not blink_detected:
 
-            detected_faces.append(
-                {
-                    "verified": False,
-                    "confidence": 0,
-                    "matched_pose": None,
-                    "message": "Please Blink",
-                    "face_box": face_box,
-                    "user": None,
-                }
-            )
+        #     detected_faces.append(
+        #         {
+        #             "verified": False,
+        #             "confidence": 0,
+        #             "matched_pose": None,
+        #             "message": "Please Blink",
+        #             "face_box": face_box,
+        #             "user": None,
+        #         }
+        #     )
 
-            continue
+        #     continue
 
         best_score = -1
 
@@ -278,6 +279,11 @@ def verify_face(
             .filter(User.id == best_face.user_id)
             .first()
         )
+        mark_attendance(
+            db=db,
+            user_id=user.id,
+            camera_name="Main Camera",
+)
 
         # Reset blink for next verification
         blink_detected = False

@@ -43,6 +43,11 @@ function Sidebar() {
       icon: <FaClipboardList />,
       path: "/logs",
     },
+    {
+  title: "Attendance",
+  path: "/attendance",
+  icon: "🗓️",
+},
   ];
 
   return (
