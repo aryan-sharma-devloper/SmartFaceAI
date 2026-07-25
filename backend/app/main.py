@@ -15,11 +15,18 @@ from app.api.dashboard import router as dashboard_router
 from app.api.verification_logs import router as verification_logs_router
 from app.api.export import router as export_router
 from app.api.attendance import router as attendance_router
+from fastapi.staticfiles import StaticFiles
+from app.api.reports import router as reports_router
 # Create all tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Smart Face AI API"
+)
+app.mount(
+    "/images",
+    StaticFiles(directory="images"),
+    name="images",
 )
 
 origins = [
@@ -42,6 +49,7 @@ app.include_router(dashboard_router)
 app.include_router(verification_logs_router)
 app.include_router(export_router)
 app.include_router(attendance_router)
+app.include_router(reports_router)
 @app.get("/")
 def root():
     return {

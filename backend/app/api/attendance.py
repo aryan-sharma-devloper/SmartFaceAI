@@ -1,7 +1,9 @@
 from datetime import date
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-
+from io import BytesIO
+from fastapi.responses import StreamingResponse
+from openpyxl import Workbook
 from app.database.database import get_db
 from app.models.attendance import Attendance
 from app.models.user import User
@@ -251,3 +253,104 @@ def attendance_stats(
         "total_today": total_today,
 
     }
+@router.get("/export")
+def export_attendance(
+    db: Session = Depends(get_db),
+):
+
+    records = (
+        db.query(Attendance, User)
+        .join(User, Attendance.user_id == User.id)
+        .order_by(
+            Attendance.date.desc(),
+            Attendance.check_in.desc(),
+        )
+        .all()
+    )
+
+    workbook = Workbook()
+
+    sheet = workbook.active
+
+    sheet.title = "Attendance"
+
+    headers = [
+
+        "Attendance ID",
+
+        "Employee ID",
+
+        "Employee Name",
+
+        "Department",
+
+        "Email",
+
+        "Phone",
+
+        "Date",
+
+        "Check In",
+
+        "Check Out",
+
+        "Working Hours",
+
+        "Status",
+
+        "Camera",
+
+    ]
+
+    sheet.append(headers)
+
+    for attendance, user in records:
+
+        sheet.append([
+
+            attendance.id,
+
+            user.employee_id,
+
+            user.full_name,
+
+            user.department,
+
+            user.email,
+
+            user.phone,
+
+            str(attendance.date),
+
+            str(attendance.check_in),
+
+            str(attendance.check_out),
+
+            attendance.working_hours,
+
+            attendance.status,
+
+            attendance.camera_name,
+
+        ])
+
+    file = BytesIO()
+
+    workbook.save(file)
+
+    file.seek(0)
+
+    return StreamingResponse(
+
+        file,
+
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+        headers={
+
+            "Content-Disposition":
+            "attachment; filename=attendance.xlsx"
+
+        },
+
+    )

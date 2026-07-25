@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 import api from "../api/axios";
+import Sidebar from "../components/Sidebar";
 
 function Users() {
   const navigate = useNavigate();
@@ -57,7 +60,9 @@ function Users() {
   }
 
   async function handleDelete(id) {
-    if (!window.confirm("Delete this user?")) return;
+    if (!window.confirm("Are you sure you want to delete this user?")) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -67,15 +72,18 @@ function Users() {
           Authorization: `Bearer ${token}`,
         },
       });
-      toast.success("User Deleted Successfully");
+
+      toast.success("User deleted successfully.");
+
       fetchUsers();
     } catch (error) {
       console.error(error);
+
       toast.error("Unable to delete user.");
     }
   }
 
-  // Pagination Logic
+  // Pagination
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
 
@@ -84,143 +92,178 @@ function Users() {
     indexOfLastUser
   );
 
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const totalPages = Math.ceil(
+    filteredUsers.length / usersPerPage
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+  <div className="flex min-h-screen bg-gray-100">
 
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+  <Sidebar />
 
-        <h1 className="text-4xl font-bold text-blue-700">
-          Manage Users
-        </h1>
+  <main className="flex-1 lg:ml-72 p-8">
 
-        <div className="flex gap-3">
+    {/* Header */}
 
-          <button
-            onClick={() => navigate("/add-user")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow"
-          >
-            ➕ Add User
-          </button>
+    <div className="flex justify-between items-center mb-8">
 
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="bg-gray-700 hover:bg-gray-800 text-white px-5 py-2 rounded-lg shadow"
-          >
-            Dashboard
-          </button>
+      <h1 className="text-4xl font-bold text-blue-700">
+        Manage Users
+      </h1>
 
-        </div>
+      <div className="flex gap-3">
 
-      </div>
+        <button
+          onClick={() => navigate("/add-user")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow"
+        >
+          ➕ Add User
+        </button>
 
-      {/* Search */}
-      <div className="mb-6">
-
-        <input
-          type="text"
-          placeholder="🔍 Search by Name, Employee ID, Email, Department..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full p-3 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="bg-gray-700 hover:bg-gray-800 text-white px-5 py-2 rounded-lg shadow"
+        >
+          Dashboard
+        </button>
 
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+    </div>
 
-        <table className="w-full">
+    {/* Search */}
 
-          <thead className="bg-blue-600 text-white">
+    <div className="mb-6">
+
+      <input
+        type="text"
+        placeholder="🔍 Search by Name, Employee ID, Email, Department..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full p-3 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+    </div>
+
+    {/* Table */}
+
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+
+      <table className="w-full">
+
+        <thead className="bg-blue-600 text-white">
+
+          <tr>
+
+            <th className="p-4 text-left">
+              Employee ID
+            </th>
+
+            <th className="p-4 text-left">
+              Full Name
+            </th>
+
+            <th className="p-4 text-left">
+              Email
+            </th>
+
+            <th className="p-4 text-left">
+              Department
+            </th>
+
+            <th className="p-4 text-left">
+              Phone
+            </th>
+
+            <th className="p-4 text-center">
+              Actions
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          {currentUsers.length === 0 ? (
 
             <tr>
-              <th className="p-4 text-left">Employee ID</th>
-              <th className="p-4 text-left">Full Name</th>
-              <th className="p-4 text-left">Email</th>
-              <th className="p-4 text-left">Department</th>
-              <th className="p-4 text-left">Phone</th>
-              <th className="p-4 text-center">Actions</th>
+
+              <td
+                colSpan="6"
+                className="text-center p-8 text-gray-500"
+              >
+                No users found.
+              </td>
+
             </tr>
 
-          </thead>
+          ) : (
 
-          <tbody>
+            currentUsers.map((user) => (
 
-            {currentUsers.length === 0 ? (
+              <tr
+                key={user.id}
+                className="border-b hover:bg-gray-50 transition"
+              >
 
-              <tr>
-                <td
-                  colSpan="6"
-                  className="text-center p-8 text-gray-500"
-                >
-                  No users found.
+                <td className="p-4">
+                  {user.employee_id}
                 </td>
+
+                <td className="p-4 font-medium">
+                  {user.full_name}
+                </td>
+
+                <td className="p-4">
+                  {user.email}
+                </td>
+
+                <td className="p-4">
+                  {user.department}
+                </td>
+
+                <td className="p-4">
+                  {user.phone || "-"}
+                </td>
+
+                <td className="p-4 text-center">
+
+                  <button
+                    onClick={() => navigate(`/enroll/${user.id}`)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded mr-2"
+                  >
+                    📷 Enroll Face
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/edit-user/${user.id}`)}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded mr-2"
+                  >
+                    ✏️ Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
+                  >
+                    🗑 Delete
+                  </button>
+
+                </td>
+
               </tr>
 
-            ) : (
+            ))
 
-              currentUsers.map((user) => (
+          )}
 
-                <tr
-                  key={user.id}
-                  className="border-b hover:bg-gray-50 transition"
-                >
+        </tbody>
 
-                  <td className="p-4">{user.employee_id}</td>
+      </table>
 
-                  <td className="p-4 font-medium">
-                    {user.full_name}
-                  </td>
-
-                  <td className="p-4">{user.email}</td>
-
-                  <td className="p-4">{user.department}</td>
-
-                  <td className="p-4">
-                    {user.phone || "-"}
-                  </td>
-
-                  <td className="p-4 text-center">
-
-                    <button
-                      onClick={() => navigate(`/enroll/${user.id}`)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded mr-2"
-                    >
-                      📷 Enroll Face
-                    </button>
-
-                    <button
-                      onClick={() => navigate(`/edit-user/${user.id}`)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded mr-2"
-                    >
-                      ✏️ Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
-                    >
-                      🗑 Delete
-                    </button>
-
-                  </td>
-
-                </tr>
-
-              ))
-
-            )}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      {/* Pagination */}
+    </div>
+          {/* Pagination */}
 
       <div className="flex justify-between items-center mt-6">
 
@@ -257,8 +300,10 @@ function Users() {
 
       </div>
 
-    </div>
-  );
+    </main>
+
+  </div>
+);
 }
 
 export default Users;

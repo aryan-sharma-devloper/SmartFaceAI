@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from app.models.attendance import Attendance
 
 
+MIN_CHECKOUT_MINUTES = 30   # Change if needed
+
+
 def mark_attendance(
     db: Session,
     user_id: int,
@@ -22,11 +25,11 @@ def mark_attendance(
         .first()
     )
 
-    # Already checked in and checked out
+    # Already checked out
     if attendance and attendance.check_out:
         return attendance
 
-    # First check-in
+    # First Check-In
     if attendance is None:
 
         attendance = Attendance(
@@ -43,26 +46,35 @@ def mark_attendance(
 
         return attendance
 
-    # Check-out
-    if attendance.check_out is None:
+    # -----------------------------
+    # Prevent instant checkout
+    # -----------------------------
 
-        attendance.check_out = datetime.now().time()
+    check_in_dt = datetime.combine(
+        today,
+        attendance.check_in,
+    )
 
-        check_in_dt = datetime.combine(
-            today,
-            attendance.check_in,
-        )
+    now_dt = datetime.now()
 
-        check_out_dt = datetime.combine(
-            today,
-            attendance.check_out,
-        )
+    minutes = (
+        now_dt - check_in_dt
+    ).total_seconds() / 60
 
-        duration = check_out_dt - check_in_dt
+    if minutes < MIN_CHECKOUT_MINUTES:
+        return attendance
 
-        attendance.working_hours = str(duration)
+    # -----------------------------
+    # Check-Out
+    # -----------------------------
 
-        db.commit()
-        db.refresh(attendance)
+    attendance.check_out = now_dt.time()
+
+    duration = now_dt - check_in_dt
+
+    attendance.working_hours = str(duration)
+
+    db.commit()
+    db.refresh(attendance)
 
     return attendance

@@ -7,16 +7,19 @@ from sqlalchemy.orm import Session
 
 from app.models.face_embedding import FaceEmbedding
 from app.models.user import User
+from app.models.verification_log import VerificationLog
+
+from app.services.attendance_service import mark_attendance
 
 from app.utils.face_engine import face_engine
 from app.utils.similarity import cosine_similarity
 from app.utils.liveness import eye_aspect_ratio
-from app.services.attendance_service import mark_attendance
+
 
 UPLOAD_DIR = "images/users"
 
 # ----------------------------------------
-# Blink Detection State
+# Blink Detection
 # ----------------------------------------
 blink_counter = 0
 blink_detected = False
@@ -119,6 +122,8 @@ def enroll_face(
     db.refresh(new_face)
 
     return new_face
+
+
 # =====================================================
 # FACE VERIFICATION
 # =====================================================
@@ -180,67 +185,14 @@ def verify_face(
             "height": int(bbox[3] - bbox[1]),
         }
 
-        # ----------------------------------------
-        # Liveness
-        # ----------------------------------------
-        # try:
-
-        #     landmarks = face.landmark_2d_106
-
-        #     left_eye = landmarks[33:39]
-
-        #     right_eye = landmarks[87:93]
-
-        #     left_ear = eye_aspect_ratio(
-        #         left_eye
-        #     )
-
-        #     right_ear = eye_aspect_ratio(
-        #         right_eye
-        #     )
-
-        #     ear = (
-        #         left_ear + right_ear
-        #     ) / 2
-
-        #     print(f"EAR : {ear:.3f}")
-
-        #     BLINK_THRESHOLD = 0.18
-
-        #     if ear < BLINK_THRESHOLD:
-
-        #         blink_counter += 1
-
-        #     else:
-
-        #         if blink_counter >= 2:
-        #             blink_detected = True
-
-        #         blink_counter = 0
-
-        # except Exception:
-
-        #     blink_detected = True
-
-        # if not blink_detected:
-
-        #     detected_faces.append(
-        #         {
-        #             "verified": False,
-        #             "confidence": 0,
-        #             "matched_pose": None,
-        #             "message": "Please Blink",
-        #             "face_box": face_box,
-        #             "user": None,
-        #         }
-        #     )
-
-        #     continue
+        # (Blink Detection code can stay commented if you want)
 
         best_score = -1
-
         best_face = None
 
+               # ----------------------------------------
+        # Compare with all stored embeddings
+        # ----------------------------------------
         for stored_face in stored_faces:
 
             score = cosine_similarity(
@@ -249,14 +201,24 @@ def verify_face(
             )
 
             if score > best_score:
-
                 best_score = score
-
                 best_face = stored_face
-                        # ----------------------------------------
+
+        # ----------------------------------------
         # Unknown Person
         # ----------------------------------------
         if best_score < THRESHOLD:
+
+            verification = VerificationLog(
+                user_id=None,
+                confidence_score=round(best_score * 100, 2),
+                status="failed",
+                camera_name="Main Camera",
+                response_time_ms=0,
+            )
+
+            db.add(verification)
+            db.commit()
 
             detected_faces.append(
                 {
@@ -272,22 +234,46 @@ def verify_face(
             continue
 
         # ----------------------------------------
-        # Get matched user
+        # Fetch matched user
         # ----------------------------------------
         user = (
             db.query(User)
             .filter(User.id == best_face.user_id)
             .first()
         )
+
+        if user is None:
+            continue
+        
+                # ----------------------------------------
+        # Mark Attendance
+        # ----------------------------------------
         mark_attendance(
             db=db,
             user_id=user.id,
             camera_name="Main Camera",
-)
+        )
 
-        # Reset blink for next verification
+        # ----------------------------------------
+        # Save Verification Log
+        # ----------------------------------------
+        verification = VerificationLog(
+            user_id=user.id,
+            confidence_score=round(best_score * 100, 2),
+            status="verified",
+            camera_name="Main Camera",
+            response_time_ms=0,
+        )
+
+        db.add(verification)
+        db.commit()
+
+        # Reset blink status
         blink_detected = False
 
+        # ----------------------------------------
+        # Add Verified Face Result
+        # ----------------------------------------
         detected_faces.append(
             {
                 "verified": True,
@@ -302,20 +288,21 @@ def verify_face(
                     "department": user.department,
                     "email": user.email,
                     "phone": user.phone,
+                    "profile_photo": user.profile_photo,
                 },
             }
         )
-
-    # ----------------------------------------
-    # Final Summary
+            # ----------------------------------------
+    # Return Final Response
     # ----------------------------------------
     verified_count = sum(
-        1 for face in detected_faces
-        if face["verified"]
+        1
+        for item in detected_faces
+        if item["verified"]
     )
 
     return {
-        "total_faces": len(detected_faces),
+        "total_faces": len(faces),
         "verified_faces": verified_count,
         "faces": detected_faces,
     }

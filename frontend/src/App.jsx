@@ -11,6 +11,8 @@ import EnrollFace from "./pages/EnrollFace";
 import VerificationLogs from "./pages/VerificationLogs";
 import Settings from "./pages/Settings";
 import Attendance from "./pages/Attendance";
+import LiveVerification from "./pages/LiveVerification";
+import AdminManagement from "./pages/AdminManagement";
 function App() {
   return (
     <BrowserRouter>
@@ -67,6 +69,14 @@ function App() {
       <Attendance />
     </ProtectedRoute>
   }
+/>
+<Route
+  path="/live-verification"
+  element={<LiveVerification />}
+/>
+<Route
+  path="/admin-management"
+  element={<AdminManagement />}
 />
       </Routes>
     </BrowserRouter>

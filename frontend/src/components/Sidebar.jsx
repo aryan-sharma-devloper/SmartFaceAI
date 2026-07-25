@@ -5,10 +5,12 @@ import {
   FaClipboardList,
   FaUserPlus,
   FaSignOutAlt,
+  FaUserShield,
+  FaHistory,
 } from "react-icons/fa";
 
 import { NavLink, useNavigate } from "react-router-dom";
-
+import { FaVideo } from "react-icons/fa";
 function Sidebar() {
   const navigate = useNavigate();
 
@@ -38,15 +40,25 @@ function Sidebar() {
       icon: <FaCamera />,
       path: "/verify",
     },
-    {
-      title: "Logs",
-      icon: <FaClipboardList />,
-      path: "/logs",
-    },
-    {
+  {
+  title: "Verification Logs",
+  path: "/verification-logs",
+  icon: <FaHistory />,
+},
+{
   title: "Attendance",
   path: "/attendance",
-  icon: "🗓️",
+  icon: <FaClipboardList />,
+},
+{
+  title: "Live Verification",
+  path: "/live-verification",
+  icon: <FaVideo />,
+},
+{
+  title: "Admin Management",
+  path: "/admin-management",
+  icon: <FaUserShield />,
 },
   ];
 

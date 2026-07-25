@@ -47,7 +47,7 @@ function Attendance() {
 
       <Sidebar />
 
-      <div className="flex-1 p-8 overflow-x-auto">
+      <div className="flex-1 lg:ml-72 p-8 overflow-x-auto">
 
         {/* Header */}
         <div className="mb-8">

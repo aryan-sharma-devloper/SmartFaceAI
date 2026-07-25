@@ -8,7 +8,7 @@ import api from "../api/axios";
 function VerifyFace() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-
+  const verifyingRef = useRef(false);
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -90,68 +90,85 @@ function VerifyFace() {
   // Verify Faces
   // ------------------------------------
   async function verifyFace() {
-    if (loading) return;
+    if (verifyingRef.current) return;
 
-    setLoading(true);
+verifyingRef.current = true;
+setLoading(true);
 
     try {
-      const imageSrc =
-        webcamRef.current?.getScreenshot();
+  const imageSrc = webcamRef.current?.getScreenshot();
 
-      if (!imageSrc) {
-        setLoading(false);
-        return;
-      }
-
-      const blob = await fetch(imageSrc).then((r) =>
-        r.blob()
-      );
-
-      const formData = new FormData();
-
-      formData.append(
-        "image",
-        blob,
-        "verify.jpg"
-      );
-
-      const response = await api.post(
-        "/faces/verify",
-        formData
-      );
-
-      setResult(response.data);
-
-      drawFaceBoxes(response.data.faces);
-
-      if (response.data.verified_faces > 0) {
-        toast.success(
-          `${response.data.verified_faces} face(s) verified`
-        );
-      }
-
-    } catch (error) {
-      console.error(error);
-
-      toast.error(
-        error.response?.data?.detail ||
-          "Verification Failed"
-      );
-    } finally {
-      setLoading(false);
-    }
+  if (!imageSrc) {
+    setLoading(false);
+    return;
   }
-     // ------------------------------------
-  // Auto Scan Every Second
+
+  const blob = await fetch(imageSrc).then((r) => r.blob());
+
+  const formData = new FormData();
+  formData.append("image", blob, "verify.jpg");
+
+  const response = await api.post("/faces/verify", formData);
+
+  console.log("VERIFY RESPONSE:", response.data);
+
+  const data = response.data;
+
+  if (!data) {
+    toast.error("Backend returned null");
+    return;
+  }
+
+  if (!Array.isArray(data.faces)) {
+    toast.error("Invalid response from backend");
+    console.log(data);
+    return;
+  }
+
+  console.log("FULL RESPONSE:", response.data);
+
+setResult(response.data);
+
+if (response.data?.faces) {
+    drawFaceBoxes(response.data.faces);
+}
+
+  if (response.data &&
+    response.data.faces &&
+    response.data.faces.length > 0 &&
+    response.data.faces[0].verified) {
+    toast.success(`${data.faces[0].user.full_name} Verified`);
+  }
+}
+catch (error) {
+  console.error(error);
+
+  toast.error(
+    error.response?.data?.detail ||
+    "Verification Failed"
+  );
+}
+finally {
+    setLoading(false);
+    verifyingRef.current = false;
+}
+  }
   // ------------------------------------
-  useEffect(() => {
+// Auto Scan Every Second
+// ------------------------------------
+useEffect(() => {
     const interval = setInterval(() => {
-      verifyFace();
+
+        // Only scan if previous request finished
+        if (!verifyingRef.current) {
+            verifyFace();
+        }
+
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [loading]);
 
+}, []);
   // ------------------------------------
   // Reset
   // ------------------------------------
@@ -229,7 +246,17 @@ function VerifyFace() {
               height={480}
               className="absolute top-0 left-0 w-full h-full pointer-events-none"
             />
-
+    <button
+    onClick={() => {
+        if (!verifyingRef.current) {
+            verifyFace();
+        }
+    }}
+    disabled={loading}
+    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+  >
+    {loading ? "Verifying..." : "Verify Face"}
+  </button>
           </div>
 
           <div className="mt-6 flex justify-center">
